@@ -3,7 +3,7 @@ from aiogram import Bot
 from os import getenv
 from src.main import dp
 import logging
-#from db.database import session
+
 
 logging.basicConfig(
     level=logging.INFO,
