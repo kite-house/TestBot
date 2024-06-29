@@ -6,7 +6,7 @@ from aiogram import Router
 from src.creation import permission
 from src.creation.states import StatesCreatingTest
 from src.creation.saveData import saveTest
-
+from src.creation.validation import Validation
 
 # Роутер
 router = Router()
@@ -18,23 +18,39 @@ async def create(message: types.Message, state: FSMContext):
     await message.answer('Приступаем к созданию теста, как хотите назвать тест?')
 
 
+
 @router.message(StatesCreatingTest.title)
 async def set_name(message: types.Message, state: FSMContext):
-    await state.update_data(title = message.text.lower())
-    await state.set_state(StatesCreatingTest.guestion)
-    await message.answer("Введите название вопроса")
+    try: 
+        await Validation.title(message, state)
+    except ValueError as error:
+        await message.reply(str(error))
+    else:
+        await state.update_data(title = message.text.lower())
+        await state.set_state(StatesCreatingTest.guestion)
+        await message.answer("Введите название вопроса")
 
 @router.message(StatesCreatingTest.guestion)
 async def add_quest(message: types.Message, state: FSMContext):
-    await state.update_data(question = message.text.lower())
-    await state.set_state(StatesCreatingTest.answerOptions)
-    await message.answer('Введите варианты ответа через запятую')
+    try:
+        await Validation.guestion(message, state)
+    except ValueError as error:
+        await message.reply(str(error))
+    else: 
+        await state.update_data(question = message.text.lower())
+        await state.set_state(StatesCreatingTest.answerOptions)
+        await message.answer('Введите варианты ответа через запятую')
 
 @router.message(StatesCreatingTest.answerOptions)
 async def add_quest(message: types.Message, state: FSMContext):
-    await state.update_data(answerOptions = message.text.lower())
-    await state.set_state(StatesCreatingTest.correctAnswer)
-    await message.answer('Введите правильный ответ: ')
+    try:
+        await Validation.answerOptions(message, state)
+    except ValueError as error:
+        await message.reply(str(error))
+    else:
+        await state.update_data(answerOptions = message.text.lower()) 
+        await state.set_state(StatesCreatingTest.correctAnswer)
+        await message.answer('Введите правильный ответ: ')
 
 @router.message(StatesCreatingTest.correctAnswer)
 async def add_quest(message: types.Message, state: FSMContext):
