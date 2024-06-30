@@ -17,3 +17,5 @@ class Tests(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String(150), default= False, nullable= False)
     questions = Column(JSON)
+    creation = Column(String(150), default= False, nullable= False)
+    date_created = Column(Date, default= False, nullable= False)

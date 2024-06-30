@@ -2,10 +2,12 @@ from db.database import session
 from db.models import Tests
 from aiogram.fsm.context import FSMContext
 from aiogram import types
+from datetime import datetime
+
 class SaveTest:
     async def save(state: FSMContext):
         data = await state.get_data()
-        session.add(Tests(title = data['title'], questions = data['questions']))
+        session.add(Tests(title = data['title'], questions = data['questions'], creator = state.key.user_id, date_created = datetime.now().date()))
         session.commit()
         await state.clear()
 

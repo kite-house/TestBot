@@ -9,7 +9,7 @@ from src.creation.saveData import SaveTest
 from src.creation.validation import Validation
 from src.creation import keyMarkup
 from aiogram.utils.formatting import Bold, as_list, as_marked_section, as_key_value, HashTag
-
+from datetime import datetime
 
 # Роутер
 router = Router()
@@ -19,7 +19,7 @@ router.message.filter(permission.administration()) # Фильтр (Только 
 
 @router.message(Command('create'))
 async def create(message: types.Message, state: FSMContext):
-    await state.update_data(questions = [], answerOptions = [])
+    await state.update_data(questions = [], answerOptions = [], creation = message.from_user.username)
     await state.set_state(StatesCreatingTest.title)
     await message.answer('Приступаем к созданию теста, как хотите назвать тест?')
 
@@ -107,8 +107,9 @@ async def next(message: types.Message, state: FSMContext):
             ),
             as_marked_section(
                 Bold('Информация'),
-                as_key_value("Создатель", 'None'),
-                as_key_value("Дата создание теста", 'None'),
+                as_key_value("Создатель", data['creation']),
+                as_key_value("Дата создание теста", datetime.now().date().strftime('%d-%m-%Y')),
+                as_key_value("Кол-во вопросов", len(data['questions'])),
                 marker=' '
             ),
             Bold('Выберите сохранить или удалить данный тест'),
