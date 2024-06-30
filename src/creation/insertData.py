@@ -19,7 +19,7 @@ router.message.filter(permission.administration()) # Фильтр (Только 
 
 @router.message(Command('create'))
 async def create(message: types.Message, state: FSMContext):
-    await state.update_data(questions = [], answerOptions = [], creation = message.from_user.username)
+    await state.update_data(questions = [], answerOptions = [], creater = message.from_user.username)
     await state.set_state(StatesCreatingTest.title)
     await message.answer('Приступаем к созданию теста, как хотите назвать тест?')
 
@@ -73,15 +73,15 @@ async def set_correctAnswer(message: types.Message, state: FSMContext):
         await state.set_state(StatesCreatingTest.next)
         data = await state.get_data()
         content = as_list( 
-            Bold(f'Успешно добавлен вопрос {data['questions'][-1]['question']}'),
+            Bold(f'Успешно добавлен вопрос {data['questions'][-1]['question'].capitalize()}'),
             as_marked_section(
                 Bold('Варианты ответов'),
-                f'{'\n ➤ '.join(map(str, data['questions'][-1]['answerOptions']))}',
+                f'{'\n ➤ '.join(map(str.capitalize, data['questions'][-1]['answerOptions']))}',
                 marker = " ➤ "
             ),
             as_marked_section(
                 Bold("Правильный вариант ответа"),
-                f'{data['questions'][-1]['correctAnswer']}',
+                f'{data['questions'][-1]['correctAnswer'].capitalize()}',
                 marker = " ➤ "
             ),
             Bold(f'Выберите продолжить чтобы добавить ещё один вопрос или завершить ввод вопросов'),
@@ -96,18 +96,18 @@ async def next(message: types.Message, state: FSMContext):
         await state.set_state(StatesCreatingTest.confirmation)
         data = await state.get_data()
         content = as_list(
-            Bold(f'Успешно создан тест {data['title']}'),
+            Bold(f'Успешно создан тест {data['title'].capitalize()}'),
             as_marked_section(
                 Bold('Список вопросов в данном тесте'),
-                f'{"\n".join([(f" ➤ Вопрос: {data['question']}\n"
-                               f"     ➤ Варианты ответа \n        ➤ {'\n        ➤ '.join(data['answerOptions'])}\n"
-                               f"     ➤ Правильный ответ: {data['correctAnswer']}\n") 
+                f'{"\n".join([(f" ➤ Вопрос: {data['question'].capitalize()}\n"
+                               f"     ➤ Варианты ответа \n        ➤ {'\n        ➤ '.join(map(str.capitalize, data['answerOptions']))}\n"
+                               f"     ➤ Правильный ответ: {data['correctAnswer'].capitalize()}\n") 
                                for data in data['questions']])}',
                 marker=''
             ),
             as_marked_section(
                 Bold('Информация'),
-                as_key_value("Создатель", data['creation']),
+                as_key_value("Создатель", data['creater']),
                 as_key_value("Дата создание теста", datetime.now().date().strftime('%d-%m-%Y')),
                 as_key_value("Кол-во вопросов", len(data['questions'])),
                 marker=' '

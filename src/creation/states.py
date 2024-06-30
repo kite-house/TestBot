@@ -9,4 +9,4 @@ class StatesCreatingTest(StatesGroup):
     correctAnswer = State()
     next = State()
     confirmation = State()
-    creation = State()
+    creater = State()
