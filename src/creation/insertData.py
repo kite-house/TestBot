@@ -7,7 +7,8 @@ from src.creation import permission
 from src.creation.states import StatesCreatingTest
 from src.creation.saveData import SaveTest
 from src.creation.validation import Validation
-
+from src.creation import keyMarkup
+from aiogram.enums import ParseMode
 # Роутер
 router = Router()
 router.message.filter(permission.administration()) # Фильтр (Только администраторы)
@@ -55,7 +56,7 @@ async def set_answerOptions(message: types.Message, state: FSMContext):
             await message.answer('Введите правильный ответ')
         else:
             await SaveTest.add_answerOptions(message, state)
-            await message.answer("Введите следующий вариант ответа или завершить")
+            await message.answer("Введите следующий вариант ответа или завершить", reply_markup=keyMarkup.confirmationAnswerOptions)
             await state.set_state(StatesCreatingTest.answerOptions)
 
 @router.message(StatesCreatingTest.correctAnswer)
@@ -69,13 +70,14 @@ async def set_correctAnswer(message: types.Message, state: FSMContext):
         await SaveTest.add_quest(state)
         await state.set_state(StatesCreatingTest.next)
         data = await state.get_data()
-        await message.answer(f'Успешно добавлен вопрос: {data['questions'][-1]['question']}\n'
-                                'Варианты ответов\n' 
-                                f'{'\n'.join(map(str, data['questions'][-1]['answerOptions']))}\n' 
-                                'Правильный ответ\n'
-                                f'{data['questions'][-1]['correctAnswer']}\n'
-                                '\n'
-                                'Введите продолжить дабы добавить ещё вопрос или же завершить')
+        await message.answer(f'Успешно добавлен вопрос: <b>{data['questions'][-1]['question']}<b>\n'
+                            'Варианты ответов\n' 
+                            f'{'\n'.join(map(str, data['questions'][-1]['answerOptions']))}\n' 
+                            'Правильный ответ\n'
+                            f'{data['questions'][-1]['correctAnswer']}\n'
+                            '\n'
+                            'Введите продолжить дабы добавить ещё вопрос или же завершить', 
+                            reply_markup=keyMarkup.confirmationQuestion, parse_mode=ParseMode.HTML)
 
 @router.message(StatesCreatingTest.next)
 async def next(message: types.Message, state: FSMContext):
@@ -86,14 +88,15 @@ async def next(message: types.Message, state: FSMContext):
                     f'Список вопросов\n'
                     f'------------------\n'
                     f'{"-------------------\n".join([f"Вопрос: {data['question']}\nВарианты ответа: {', '.join(data['answerOptions'])}\nПравильный ответ: {data['correctAnswer']}\n" for data in data['questions']])}'
-                    f'--------------------\n')
+                    f'--------------------\n'
+                    f'Если вам понравился тест введите сохранить для отправки на сервер, или же удалить', reply_markup=keyMarkup.confirmationSaveTest)
     
     elif message.text.lower() == 'продолжить':
         await state.set_state(StatesCreatingTest.question)
         await message.reply('Введите название вопроса')
 
     else:
-        await message.reply("Введите продолжить дабы добавить ещё вопрос или же завершить")
+        await message.reply("Введите продолжить дабы добавить ещё вопрос или же завершить", reply_markup=keyMarkup.confirmationQuestion)
         await state.set_state(StatesCreatingTest.next)
 
 @router.message(StatesCreatingTest.confirmation)
@@ -108,4 +111,4 @@ async def confirmation(message: types.Message, state: FSMContext):
 
     else:
         await state.set_state(StatesCreatingTest.confirmation)
-        await message.reply('Введите продолжить или удалить!')
+        await message.reply('Введите продолжить или удалить!', reply_markup=keyMarkup.confirmationSaveTest)
