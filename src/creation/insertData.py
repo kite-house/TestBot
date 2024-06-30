@@ -8,7 +8,9 @@ from src.creation.states import StatesCreatingTest
 from src.creation.saveData import SaveTest
 from src.creation.validation import Validation
 from src.creation import keyMarkup
-from aiogram.enums import ParseMode
+from aiogram.utils.formatting import Bold, as_list, as_marked_section, as_key_value, HashTag
+
+
 # Роутер
 router = Router()
 router.message.filter(permission.administration()) # Фильтр (Только администраторы)
@@ -70,27 +72,51 @@ async def set_correctAnswer(message: types.Message, state: FSMContext):
         await SaveTest.add_quest(state)
         await state.set_state(StatesCreatingTest.next)
         data = await state.get_data()
-        await message.answer(f'Успешно добавлен вопрос: <b>{data['questions'][-1]['question']}<b>\n'
-                            'Варианты ответов\n' 
-                            f'{'\n'.join(map(str, data['questions'][-1]['answerOptions']))}\n' 
-                            'Правильный ответ\n'
-                            f'{data['questions'][-1]['correctAnswer']}\n'
-                            '\n'
-                            'Введите продолжить дабы добавить ещё вопрос или же завершить', 
-                            reply_markup=keyMarkup.confirmationQuestion, parse_mode=ParseMode.HTML)
+        content = as_list( 
+            Bold(f'Успешно добавлен вопрос {data['questions'][-1]['question']}'),
+            as_marked_section(
+                Bold('Варианты ответов'),
+                f'{'\n ➤ '.join(map(str, data['questions'][-1]['answerOptions']))}',
+                marker = " ➤ "
+            ),
+            as_marked_section(
+                Bold("Правильный вариант ответа"),
+                f'{data['questions'][-1]['correctAnswer']}',
+                marker = " ➤ "
+            ),
+            Bold(f'Выберите продолжить чтобы добавить ещё один вопрос или завершить ввод вопросов'),
+            sep = '\n\n'
+            
+        )
+        await message.answer(**content.as_kwargs(), reply_markup=keyMarkup.confirmationQuestion)
 
 @router.message(StatesCreatingTest.next)
 async def next(message: types.Message, state: FSMContext):
     if message.text.lower() == "завершить":
         await state.set_state(StatesCreatingTest.confirmation)
         data = await state.get_data()
-        await message.reply(f'Вы создали тест {data['title']}\n'
-                    f'Список вопросов\n'
-                    f'------------------\n'
-                    f'{"-------------------\n".join([f"Вопрос: {data['question']}\nВарианты ответа: {', '.join(data['answerOptions'])}\nПравильный ответ: {data['correctAnswer']}\n" for data in data['questions']])}'
-                    f'--------------------\n'
-                    f'Если вам понравился тест введите сохранить для отправки на сервер, или же удалить', reply_markup=keyMarkup.confirmationSaveTest)
-    
+        content = as_list(
+            Bold(f'Успешно создан тест {data['title']}'),
+            as_marked_section(
+                Bold('Список вопросов в данном тесте'),
+                f'{"\n".join([(f" ➤ Вопрос: {data['question']}\n"
+                               f"     ➤ Варианты ответа \n        ➤ {'\n        ➤ '.join(data['answerOptions'])}\n"
+                               f"     ➤ Правильный ответ: {data['correctAnswer']}\n") 
+                               for data in data['questions']])}',
+                marker=''
+            ),
+            as_marked_section(
+                Bold('Информация'),
+                as_key_value("Создатель", 'None'),
+                as_key_value("Дата создание теста", 'None'),
+                marker=' '
+            ),
+            Bold('Выберите сохранить или удалить данный тест'),
+            sep="\n\n"
+        )
+
+        await message.reply(**content.as_kwargs(),reply_markup=keyMarkup.confirmationSaveTest)
+
     elif message.text.lower() == 'продолжить':
         await state.set_state(StatesCreatingTest.question)
         await message.reply('Введите название вопроса')
