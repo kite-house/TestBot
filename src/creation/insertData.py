@@ -16,8 +16,7 @@ router.message.filter(permission.administration()) # Фильтр (Только 
 
 @router.message(Command('create'))
 async def create(message: types.Message, state: FSMContext):
-    await state.update_data(questions = [])
-    await state.update_data(answerOptions = [])
+    await state.update_data(questions = [], answerOptions = [])
     await state.set_state(StatesCreatingTest.title)
     await message.answer('Приступаем к созданию теста, как хотите назвать тест?')
 
@@ -26,7 +25,7 @@ async def create(message: types.Message, state: FSMContext):
 async def set_title(message: types.Message, state: FSMContext):
     try: 
         await Validation.title(message, state)
-    except ValueError as error:
+    except Exception as error:
         await message.reply(str(error))
     else:
         await state.update_data(title = message.text.lower())
@@ -37,7 +36,7 @@ async def set_title(message: types.Message, state: FSMContext):
 async def set_question(message: types.Message, state: FSMContext):
     try:
         await Validation.question(message, state)
-    except ValueError as error:
+    except Exception as error:
         await message.reply(str(error))
     else: 
         await state.update_data(question = message.text.lower())
@@ -48,7 +47,7 @@ async def set_question(message: types.Message, state: FSMContext):
 async def set_answerOptions(message: types.Message, state: FSMContext):
     try:
         await Validation.answerOptions(message, state)
-    except ValueError as error:
+    except Exception as error:
         await message.reply(str(error))
     else:
         if message.text.lower() == 'завершить':
@@ -61,17 +60,22 @@ async def set_answerOptions(message: types.Message, state: FSMContext):
 
 @router.message(StatesCreatingTest.correctAnswer)
 async def set_correctAnswer(message: types.Message, state: FSMContext):
-    await state.update_data(correctAnswer = message.text.lower())
-    await SaveTest.add_quest(state)
-    await state.set_state(StatesCreatingTest.next)
-    data = await state.get_data()
-    await message.answer(f'Успешно добавлен вопрос: {data['questions'][-1]['question']}\n'
-                          'Варианты ответов\n' 
-                         f'{'\n'.join(map(str, data['questions'][-1]['answerOptions']))}\n' 
-                          'Правильный ответ\n'
-                         f'{data['questions'][-1]['correctAnswer']}\n'
-                          '\n'
-                          'Введите продолжить дабы добавить ещё вопрос или же завершить')
+    try:
+        await Validation.correctAnswer(message, state)
+    except Exception as error:
+        await message.reply(str(error))
+    else:
+        await state.update_data(correctAnswer = message.text.lower())
+        await SaveTest.add_quest(state)
+        await state.set_state(StatesCreatingTest.next)
+        data = await state.get_data()
+        await message.answer(f'Успешно добавлен вопрос: {data['questions'][-1]['question']}\n'
+                                'Варианты ответов\n' 
+                                f'{'\n'.join(map(str, data['questions'][-1]['answerOptions']))}\n' 
+                                'Правильный ответ\n'
+                                f'{data['questions'][-1]['correctAnswer']}\n'
+                                '\n'
+                                'Введите продолжить дабы добавить ещё вопрос или же завершить')
 
 @router.message(StatesCreatingTest.next)
 async def next(message: types.Message, state: FSMContext):

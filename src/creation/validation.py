@@ -26,3 +26,9 @@ class Validation:
         if duplicates:
             await state.set_state(StatesCreatingTest.answerOptions)
             raise ValueError('Варианты ответа повторяются!')
+        
+    async def correctAnswer(message: types.Message, state: FSMContext):
+        data = await state.get_data()
+        if message.text.lower() not in data['answerOptions']:
+            await state.set_state(StatesCreatingTest.correctAnswer)
+            raise ValueError('Необходимо чтобы правильный ответ совпадал с одним из вариантов ответа!')
