@@ -1,13 +1,11 @@
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import Command
-from aiogram import types
-from magic_filter import F
-from aiogram import Router
+from aiogram import types, Router
 from src.adminTools import permission
 from src.creation.states import StatesCreatingTest
 from src.creation.saveData import SaveTest
 from src.creation.validation import Validation
-from src.creation import keyMarkup
+from src import keyMarkup
 from aiogram.utils.formatting import Bold, as_list, as_marked_section, as_key_value
 from datetime import datetime
 

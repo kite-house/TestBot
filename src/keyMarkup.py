@@ -1,5 +1,5 @@
 from aiogram import types
-from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 
 confirmationAnswerOptions = ReplyKeyboardMarkup(keyboard=[
@@ -21,6 +21,13 @@ confirmationSaveTest = ReplyKeyboardMarkup(keyboard=[
     [
         KeyboardButton(text = 'сохранить'),
         KeyboardButton(text = 'удалить')
+    ]
+    ], resize_keyboard=True, one_time_keyboard= True
+)
+
+startTest = ReplyKeyboardMarkup(keyboard= [
+    [
+        KeyboardButton(text = 'пройти тест')
     ]
     ], resize_keyboard=True, one_time_keyboard= True
 )

@@ -1,7 +1,6 @@
 from db.database import session
 from db.models import User
 from typing import Union, Dict, Any
-
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
 

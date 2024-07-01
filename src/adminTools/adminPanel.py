@@ -1,9 +1,7 @@
-from aiogram import Router
 from src.adminTools import permission
 from aiogram.filters import Command
-from aiogram import types
-from src.adminTools.tools import admin
-from src.adminTools.tools import tests
+from aiogram import types, Router
+from src.adminTools.tools import admin, tests
 
 # Роутер
 router = Router()
