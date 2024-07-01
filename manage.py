@@ -2,6 +2,7 @@ import asyncio
 from aiogram import Bot
 from os import getenv
 from src.main import dp
+from aiogram import types
 import logging
 
 

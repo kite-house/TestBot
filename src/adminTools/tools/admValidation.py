@@ -1,12 +1,12 @@
 from aiogram import types
 
 class Validation:
-    def user(func):
+    def args(func):
         async def wrapper(message: types.Message):
             try:
-                return await func(message, username = message.text.lower().split(' ')[1])
+                return await func(message, ' '.join(message.text.lower().split(' ')[1:]))
             except IndexError:
-                await message.reply('Укажите пользователя!')
+                await message.reply('Укажите обьект, после команды через пробел!')
             except SystemError as error:
                 await message.reply(str(error))
             except Exception as error:
