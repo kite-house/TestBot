@@ -3,11 +3,15 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.filters import Command, StateFilter
 from aiogram import Dispatcher, types
 from src.creation.insertData import router as instertRouter
+from src.adminTools.adminPanel import router as adminRouter
 from db.database import session
 from db.models import User
 
 dp = Dispatcher()
-dp.include_router(instertRouter) # Добавляем команды из instertData
+dp.include_routers(
+    instertRouter, 
+    adminRouter
+)
 
 # Start
 @dp.message(Command('start'))
